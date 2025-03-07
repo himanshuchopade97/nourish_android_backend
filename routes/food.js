@@ -37,18 +37,41 @@ router.post("/add-food", authMiddleware, async (req, res) => {
 
 
 router.get("/get-food",authMiddleware, async (req, res) => {
-    const userId = req.query.userId; 
-  
-    if (!userId) {
-        return res.status(400).json({ message: "User ID is required" });
-    }
+    const userId = req.query.userId;
+    const foodName = req.query.foodName;
 
-    try {
-        const foods = await Food.find({ userId: userId });
-        res.json(foods);
-    } catch (err) {
-        console.error("Error fetching foods for dashboard:", err);
-        res.status(500).json({ message: "Error fetching foods" });
+    if (userId) {
+        // Fetch all foods for a user (for food history)
+        try {
+            const foods = await Food.find({ userId: userId });
+            res.json(foods);
+        } catch (err) {
+            console.error("Error fetching foods for user:", err);
+            res.status(500).json({ message: "Error fetching foods" });
+        }
+    } else if (foodName) {
+        // Fetch a single food item by name
+        try {
+            const food = await Food.findOne({ food_name: foodName });
+            if (food) {
+                res.json({
+                    food_name: food.food_name,
+                    protein: food.protein_g,
+                    fats: food.fat_g,
+                    carbs: food.carb_g,
+                    fiber: food.fibre_g,
+                    energy_kcal: food.energy_kcal,
+                    glycemic_index: food.glycemic_index,
+                });
+            } else {
+                res.status(404).json({ message: "Food not found" });
+            }
+        } catch (err) {
+            console.error("Error fetching food by name:", err);
+            res.status(500).json({ message: "Error fetching food" });
+        }
+    } else {
+        return res.status(400).json({ message: "Either userId or foodName is required" });
     }
 });
 
