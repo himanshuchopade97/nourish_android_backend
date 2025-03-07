@@ -9,7 +9,7 @@ const router = express.Router();
 // REGISTER USER
 router.post('/register', async (req, res) => {
     try {
-        const { firstName, lastName, email, contact, username, password } = req.body;
+        const { firstname, lastname, email, contact, username, password } = req.body;
 
         let user = await User.findOne({ email });
         if (user) return res.status(400).json({ msg: "User with this email already exists" });
@@ -19,8 +19,8 @@ router.post('/register', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         user = new User({
-            firstName,
-            lastName,
+            firstname,
+            lastname,
             email,
             contact,
             username,
@@ -52,7 +52,7 @@ router.post('/login', async (req, res) => {
           };
 
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
-        res.json({ token, user: { id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email, username: user.username, contact: user.contact } });
+        res.json({ token, user: { id: user._id, firstname: user.firstname, lastname: user.lastname, email: user.email, username: user.username, contact: user.contact } });
 
     } catch (err) {
         console.error(err);
